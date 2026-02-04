@@ -1,4 +1,4 @@
-package com.star.share.token;
+package com.star.share.auth.token;
 
 import com.star.share.auth.config.AuthProperties;
 import com.star.share.user.entity.User;
@@ -56,7 +56,7 @@ public class JwtService {
      * @param user      user info to put in token
      * @param issueAt   token issue time
      * @param expireAt  token expire time
-     * @param tokenType token type, can be "access_token" or "refresh_token"
+     * @param tokenType token type, can be "access" or "refresh"
      * @param tokenId   token id, used for refresh token management, can be stored in database or cache
      * @return Encoded JWT token string
      */
