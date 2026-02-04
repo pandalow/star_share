@@ -2,7 +2,6 @@ package com.star.share.auth.token;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
