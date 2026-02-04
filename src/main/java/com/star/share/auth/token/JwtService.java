@@ -133,7 +133,8 @@ public class JwtService {
      * @return Token id string, if claim is missing or invalid, return empty string
      */
     public String extractTokenId(Jwt jwt) {
-        return jwt.getId();
+        String tokenId = jwt.getId();
+        return tokenId != null ? tokenId : "";
     }
 
 }
