@@ -27,6 +27,7 @@ public class AuthController {
 
     /**
      * Send verification code to user, used for login and registration
+     *
      * @param request SendCodeRequest with identifier and scene
      *                contains:
      *                - identifierType: the type of identifier, can be email or phone number
@@ -35,44 +36,60 @@ public class AuthController {
      * @return SendCodeResponse with identifier, scene and expire seconds
      */
     @PostMapping("/send-code")
-    public SendCodeResponse sendCode(@Valid @RequestBody SendCodeRequest request){
+    public SendCodeResponse sendCode(@Valid @RequestBody SendCodeRequest request) {
         return authService.sendCode(request);
     }
 
     /**
      * Register user with verification code, used for registration
-     * @param request RegisterRequest with identifier, code and password
+     *
+     * @param request     RegisterRequest with identifier, code and password
      * @param httpRequest HttpServletRequest for resolve client information
      * @return AuthResponse with access token and refresh token
      */
     @PostMapping("/register")
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest){
+    public AuthResponse register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
         return authService.register(request, resolveClient(httpRequest));
     }
 
     /**
+     * Login with verification code and password, used for login
+     *
+     * @param request     LoginRequest with identifier, code and password
+     * @param httpRequest HttpServletRequest for resolve client information
+     * @return AuthResponse with access token and refresh token
+     */
+    @PostMapping("/login")
+    public AuthResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        return authService.login(request, resolveClient(httpRequest));
+    }
+
+    /**
      * Refresh access token with refresh token, used for token refresh
+     *
      * @param request contains refresh token string and refresh token id(jti), used for refresh token management
      * @return TokenResponse with new access token and refresh token
      */
     @PostMapping("/token/refresh")
-    public TokenResponse refresh(@Valid @RequestBody TokenRefreshRequest request){
+    public TokenResponse refresh(@Valid @RequestBody TokenRefreshRequest request) {
         return authService.refresh(request);
     }
 
     /**
      * Logout and invalidate refresh token, used for logout
+     *
      * @param request contains refresh token string and refresh token id(jti), used for refresh token management
-     * @return  ResponseEntity with no content
+     * @return ResponseEntity with no content
      */
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequest request){
+    public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequest request) {
         authService.logout(request.refreshToken());
         return ResponseEntity.noContent().build();
     }
 
     /**
      * Reset password with verification code, used for password reset
+     *
      * @param request PasswordResetRequest with identifier, code and new password
      * @return ResponseEntity with no content
      */
@@ -84,11 +101,12 @@ public class AuthController {
 
     /**
      * Get current user info, used for get current user info
+     *
      * @param jwt Jwt token contains user id and other claims, injected by Spring Security
      * @return AuthUserResponse with user id, username, email and phone number
      */
     @GetMapping("/me")
-    public AuthUserResponse me(@AuthenticationPrincipal Jwt jwt){
+    public AuthUserResponse me(@AuthenticationPrincipal Jwt jwt) {
         long userId = jwtService.extractUserId(jwt);
         return authService.me(userId);
     }
