@@ -1,4 +1,4 @@
-package com.star.share.token;
+package com.star.share.auth.token;
 
 import com.star.share.auth.config.AuthProperties;
 import com.star.share.user.entity.User;

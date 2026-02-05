@@ -1,4 +1,4 @@
-package com.star.share.token;
+package com.star.share.auth.token;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
