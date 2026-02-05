@@ -1,10 +1,8 @@
 package com.star.share.auth.service;
 
 import com.star.share.auth.enumerate.VerificationScene;
-import com.star.share.auth.model.SendCodeResult;
-import com.star.share.auth.model.VerificationCheckResult;
-
-import java.time.Duration;
+import com.star.share.auth.pojo.SendCodeResult;
+import com.star.share.auth.pojo.VerificationCheckResult;
 
 public interface VerificationService {
 

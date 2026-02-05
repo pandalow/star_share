@@ -16,7 +16,8 @@ public enum ErrorCode {
     BAD_REQUEST("BAD_REQUEST", "bad request"),
     TERMS_NOT_ACCEPTED("TERMS_NOT_ACCEPTED", "terms of service not accepted"),
     REFRESH_TOKEN_INVALID("REFRESH_TOKEN_INVALID", "refresh token invalid"),
-    INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", "internal server error");
+    INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", "internal server error"),
+    INVALID_CREDENTIALS("INVALID_CREDENTIALS", "invalid credentials");
 
 
 

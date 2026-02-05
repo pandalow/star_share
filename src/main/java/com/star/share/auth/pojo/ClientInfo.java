@@ -1,4 +1,4 @@
-package com.star.share.auth.model;
+package com.star.share.auth.pojo;
 
 /**
  * Client information

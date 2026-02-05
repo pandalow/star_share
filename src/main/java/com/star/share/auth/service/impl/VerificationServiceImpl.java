@@ -2,8 +2,8 @@ package com.star.share.auth.service.impl;
 
 import com.star.share.auth.config.AuthProperties;
 import com.star.share.auth.enumerate.VerificationScene;
-import com.star.share.auth.model.SendCodeResult;
-import com.star.share.auth.model.VerificationCheckResult;
+import com.star.share.auth.pojo.SendCodeResult;
+import com.star.share.auth.pojo.VerificationCheckResult;
 import com.star.share.auth.service.VerificationService;
 import com.star.share.auth.verification.CodeSender;
 import com.star.share.auth.verification.VerificationCodeRepository;

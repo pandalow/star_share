@@ -1,7 +1,7 @@
 package com.star.share.auth.verification;
 
 import com.star.share.auth.enumerate.VerificationCodeStatus;
-import com.star.share.auth.model.VerificationCheckResult;
+import com.star.share.auth.pojo.VerificationCheckResult;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.HashOperations;

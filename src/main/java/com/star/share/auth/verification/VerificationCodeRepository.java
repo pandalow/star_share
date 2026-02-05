@@ -1,6 +1,6 @@
 package com.star.share.auth.verification;
 
-import com.star.share.auth.model.VerificationCheckResult;
+import com.star.share.auth.pojo.VerificationCheckResult;
 
 import java.time.Duration;
 
