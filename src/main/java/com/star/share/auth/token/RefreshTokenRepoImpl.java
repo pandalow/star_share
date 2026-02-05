@@ -1,11 +1,16 @@
 package com.star.share.auth.token;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-
+@Slf4j
 @Component
 public class RefreshTokenRepoImpl implements RefreshTokenRepository {
     private final StringRedisTemplate redisTemplate;
@@ -62,14 +67,36 @@ public class RefreshTokenRepoImpl implements RefreshTokenRepository {
 
     /**
      * Revoke all refresh tokens for user, used for refresh token management, e.g. when user change password or logout
+     * Optimizing using scan for pattern matching and batch delete, avoid using keys command which may
+     * cause performance issue in production environment with large data volume
      * @param userId user id
      */
     @Override
     public void revokeAllTokens(long userId) {
         String pattern = "auth:rt:%d:*".formatted(userId);
-        var keys = redisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
+        ScanOptions options = ScanOptions
+                .scanOptions()
+                .match(pattern)
+                .count(1000)
+                .build();
+
+        try (Cursor<String> cursor = redisTemplate.scan(options)) {
+            List<String> keysToDelete = new ArrayList<>();
+
+            while (cursor.hasNext()) {
+                keysToDelete.add(cursor.next());
+
+                if (keysToDelete.size() >= 100) {
+                    redisTemplate.delete(keysToDelete);
+                    keysToDelete.clear();
+                }
+            }
+
+            if (!keysToDelete.isEmpty()) {
+                redisTemplate.delete(keysToDelete);
+            }
+        } catch (Exception e) {
+            log.error("Scan tokens failed", e);
         }
     }
 }
