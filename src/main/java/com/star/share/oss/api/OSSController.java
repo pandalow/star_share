@@ -48,7 +48,7 @@ public class OSSController {
         try {
             postId = Long.parseLong(request.postId());
         } catch (NumberFormatException e) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "Illegal postId format");
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "invalid post ID format");
         }
 
         // Validate post existence and ownership
