@@ -9,7 +9,7 @@ public final class CounterKeys {
         // Prevent instantiation
     }
 
-    public static final String sdsKey(String entityType, String entityId) {
+    public static String sdsKey(String entityType, String entityId) {
         // Key SDS format: cnt:v1:entityType:entityId
         return String.format("cnt:%s:%s:%s", CounterSchema.SCHEMA_ID, entityType, entityId);
     }

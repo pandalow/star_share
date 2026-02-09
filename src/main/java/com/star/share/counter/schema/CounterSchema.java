@@ -17,8 +17,8 @@ public class CounterSchema {
     public static final int FIELD_SIZE = 4; // 4 bytes INT 32
     public static final int SCHEMA_LEN = 5; // Save 5 fields;
 
-    private static final int IDX_LIKE = 1;
-    private static final  int IDX_FAV = 2;
+    public static final int IDX_LIKE = 1;
+    public static final  int IDX_FAV = 2;
     public static final Map<String , Integer> NAME_TO_IDX = Map.of(
             "like", IDX_LIKE,
             "fav", IDX_FAV
