@@ -65,7 +65,7 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         if (request.zgId() != null && !request.zgId().isBlank()) {
-            boolean exists = userMapper.existByZgIdExpectId(
+            boolean exists = userMapper.existsByZgIdExceptId(
                     request.zgId(),
                     current.getId()
             );
