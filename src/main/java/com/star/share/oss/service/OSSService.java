@@ -100,8 +100,11 @@ public class OSSService {
     }
 
     private void ensureConfigured() {
-        if (props.getEndpoint() == null || props.getAccessKeyId() == null || props.getAccessKeySecret() == null || props.getBucket() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "对象存储未配置");
+        if (props.getEndpoint() == null || props.getEndpoint().isBlank()
+                || props.getAccessKeyId() == null || props.getAccessKeyId().isBlank()
+                || props.getAccessKeySecret() == null || props.getAccessKeySecret().isBlank()
+                || props.getBucket() == null || props.getBucket().isBlank()) {
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "Object storage is not configured on the server");
         }
     }
 }
