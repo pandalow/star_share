@@ -19,10 +19,10 @@ public class CanalOutboxConsumer {
     private final RelationEventProcessor processor;
 
     /**
-     * Consume messsage from Canal outbox topic,
+     * Consume message from Canal outbox topic,
      * Listen Canal -> Kafka -> Relation Service
      * Using manual acknowledgment to ensure at-least-once processing semantics.
-     * @param message
+     * @param message 
      * @param ack
      */
     @KafkaListener(topics = OutboxTopics.CANAL_OUTBOX, groupId = "relation-outbox-consumer")
