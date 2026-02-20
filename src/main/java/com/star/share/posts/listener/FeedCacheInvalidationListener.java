@@ -2,8 +2,16 @@ package com.star.share.posts.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
+import com.star.share.posts.entity.model.Post;
 import com.star.share.counter.event.CounterEvent;
+import com.star.share.posts.entity.vo.FeedItemResponse;
 import com.star.share.posts.entity.vo.FeedPageResponse;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.context.event.EventListener;
@@ -32,7 +40,7 @@ public class FeedCacheInvalidationListener {
      *
      * <p>processing：</p>
      *
-     * - Only process like/fav events for entity type "knowpost";
+     * - Only process like/fav events for entity type "post";
      * - If the creator ID of the content can be resolved, synchronize their "likes/favs received" counts;
      * - Use the reverse index sets from the last two hours to locate affected pages:
      *  - Update local Caffeine page cache (preserving liked/faved flags);
@@ -51,7 +59,7 @@ public class FeedCacheInvalidationListener {
             int delta = event.getDelta();
 
             try {
-                KnowPost post = knowPostMapper.findById(Long.valueOf(eid));
+                Post post = postMapper.findById(Long.valueOf(eid));
                 if (post != null && post.getCreatorId() != null) {
                     long owner = post.getCreatorId();
                     if ("like".equals(metric)) {
@@ -101,13 +109,13 @@ public class FeedCacheInvalidationListener {
     }
 
     /**
-     * 调整页面快照中的目标内容计数。
+     * Adjust the like/fav counts of a feed page response for a specific item ID.
      *
-     * <p>行为：</p>
-     * - 遍历页面 items，定位 id==eid 的项并更新 like/fav；
-     * - preserveUserFlags=true：保留 liked/faved 标志用于本地缓存；
-     * - preserveUserFlags=false：写回 Redis 页面 JSON 时不携带用户态标志；
-     * - 返回新的页面响应快照。
+     * <p>Behavior:</p>
+     * - Iterate through the page items, locate the item with id==eid, and update like/fav counts;
+     * - preserveUserFlags=true: retain liked/faved flags for local cache;
+     * - preserveUserFlags=false: do not include user state flags when writing back to Redis page JSON;
+     * - Return a new snapshot of the page response.
      */
     private FeedPageResponse adjustPageCounts(FeedPageResponse page, String eid, String metric, int delta, boolean preserveUserFlags) {
         List<FeedItemResponse> items = new ArrayList<>(page.items().size());
@@ -149,11 +157,11 @@ public class FeedCacheInvalidationListener {
     }
 
     /**
-     * 写回页面 JSON 并保留原 TTL。
+     * Write the updated page JSON back to Redis, preserving the original TTL if it exists.
      *
-     * <p>目的：</p>
-     * - 保持页面缓存的过期策略一致，避免因覆盖写导致 TTL 重置；
-     * - 若键未设置 TTL，则直接写入最新 JSON。
+     * <p>Behavior:</p>
+     * - Preserve the original TTL of the page cache to avoid resetting it due to overwrite;
+     * - If the key does not have a TTL, write the latest JSON directly.
      */
     private void writePageJsonKeepingTtl(String key, FeedPageResponse page) {
         try {
