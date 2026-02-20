@@ -59,7 +59,7 @@ public class OSSService {
             );
             client.putObject(request);
         } catch (IOException e) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "Failed to upload file");
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to upload file");
         } finally {
             client.shutdown();
         }
