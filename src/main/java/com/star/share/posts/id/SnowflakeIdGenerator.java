@@ -1,0 +1,106 @@
+package com.star.share.posts.id;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class SnowflakeIdGenerator {
+    private static final long EPOCH = 1704067200000L; // 2024-01-01 00:00:00 UTC
+
+    private static final long WORKER_ID_BITS = 5L;
+    private static final long DATACENTER_ID_BITS = 5L;
+    private static final long SEQUENCE_BITS = 12L;
+
+    private static final long MAX_WORKER_ID = ~(-1L << WORKER_ID_BITS);
+    private static final long MAX_DATACENTER_ID = ~(-1L << DATACENTER_ID_BITS);
+
+    private static final long WORKER_ID_SHIFT = SEQUENCE_BITS;
+    private static final long DATACENTER_ID_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
+    private static final long TIMESTAMP_LEFT_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS + DATACENTER_ID_BITS;
+    private static final long SEQUENCE_MASK = ~(-1L << SEQUENCE_BITS);
+
+    private final long datacenterId;
+    private final long workerId;
+
+    private long lastTimestamp = -1L;
+    private long sequence = 0L;
+
+    public SnowflakeIdGenerator() {
+        this(1, 1);
+    }
+
+    public SnowflakeIdGenerator(long datacenterId, long workerId) {
+        if (workerId > MAX_WORKER_ID || workerId < 0) {
+            throw new IllegalArgumentException("workerId out of range");
+        }
+        if (datacenterId > MAX_DATACENTER_ID || datacenterId < 0) {
+            throw new IllegalArgumentException("datacenterId out of range");
+        }
+        this.datacenterId = datacenterId;
+        this.workerId = workerId;
+    }
+
+    public synchronized long nextId() {
+        long timestamp = currentTime();
+
+//        if (timestamp < lastTimestamp) {
+//            throw new IllegalStateException("Clock moved backwards. Refusing to generate id");
+//        }
+        // Waiting for clock to catch up if it's a minor backward shift, otherwise throw an exception
+        if (timestamp < lastTimestamp) {
+            long offset = lastTimestamp - timestamp;
+
+            // 1. Permit a small clock rollback (e.g., up to 5ms), and wait for the system clock to catch up
+            if (offset <= 5) {
+                try {
+                    // Sleep for the offset duration to allow the clock to catch up
+                    Thread.sleep(offset);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("Thread interrupted while waiting for clock to catch up", e);
+                }
+
+                timestamp = currentTime();
+                if (timestamp < lastTimestamp) {
+                    // IF the clock is still behind after waiting, throw an exception to avoid generating duplicate IDs
+                    throw new IllegalStateException(
+                            "Clock is still behind after waiting. last=" + lastTimestamp + ", now=" + timestamp);
+                }
+            } else {
+                // 2. Rollback is too large, throw an exception immediately to prevent potential ID collisions
+                throw new IllegalStateException(
+                        "Clock moved backwards too much. Refusing to generate id. offset=" + offset + "ms");
+            }
+        }
+
+        // If it's the same millisecond as the last ID generation, increment the sequence number
+        if (lastTimestamp == timestamp) {
+            sequence = (sequence + 1) & SEQUENCE_MASK;
+            if (sequence == 0) {
+                // Sequence overflow in the same millisecond, wait for the next millisecond
+                timestamp = waitNextMillis(lastTimestamp);
+            }
+        } else {
+            sequence = 0L;
+        }
+
+        lastTimestamp = timestamp;
+
+        // Construct the ID by combining the timestamp, datacenter ID, worker ID, and sequence number
+        return ((timestamp - EPOCH) << TIMESTAMP_LEFT_SHIFT)
+                | (datacenterId << DATACENTER_ID_SHIFT)
+                | (workerId << WORKER_ID_SHIFT)
+                | sequence;
+    }
+
+    private long waitNextMillis(long lastTimestamp) {
+        long timestamp = currentTime();
+        while (timestamp <= lastTimestamp) {
+            timestamp = currentTime();
+        }
+        return timestamp;
+    }
+
+    private long currentTime() {
+        return System.currentTimeMillis();
+    }
+}
