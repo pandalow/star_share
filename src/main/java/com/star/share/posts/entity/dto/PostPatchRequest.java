@@ -13,7 +13,7 @@ public record PostPatchRequest(
         @Size(max = 20) List<String> tags,
         @Size(max = 20) List<String> imgUrls,
         String visible,
-        String isTop,
+        Boolean isTop,
         String description
 ) {
 }

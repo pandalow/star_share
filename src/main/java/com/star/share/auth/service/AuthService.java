@@ -1,14 +1,11 @@
 package com.star.share.auth.service;
 
-import com.star.share.auth.enumerate.IdentifierType;
 import com.star.share.auth.pojo.ClientInfo;
-import com.star.share.auth.pojo.VerificationCheckResult;
 import com.star.share.auth.pojo.dto.*;
 import com.star.share.auth.pojo.vo.AuthResponse;
 import com.star.share.auth.pojo.vo.AuthUserResponse;
 import com.star.share.auth.pojo.vo.SendCodeResponse;
 import com.star.share.auth.pojo.vo.TokenResponse;
-import com.star.share.user.entity.User;
 
 import java.util.Optional;
 
