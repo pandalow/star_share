@@ -12,7 +12,6 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.css.Counter;
 
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -220,6 +219,10 @@ public class CounterServiceImpl implements CounterService {
         List<String> args = List.of(String.valueOf(bit), add ? "add" : "remove");
 
         Long changed = redis.execute(toggleScript, keys, args.toArray());
+        if (changed == null) {
+            // Redis error or timeout; treat as no change
+            return false;
+        }
 
         boolean ok = changed == 1L;
         if (ok) {
