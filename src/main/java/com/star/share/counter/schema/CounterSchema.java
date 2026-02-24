@@ -5,7 +5,7 @@ import java.util.Set;
 
 /**
  * Defines the schema for counters, including field sizes and mappings.
- * V1 version using 8 bytes INT 64 for counters(SDS), can replace with 5 bytes INT 40 if needed.
+ * V1 version using 4 bytes INT 32 for counters(SDS), can replace with 5 bytes INT 40 if needed.
  */
 public class CounterSchema {
     // 0: read
