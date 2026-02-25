@@ -38,11 +38,10 @@ public class PostController {
     private final JwtService jwtService;
 
     /**
-     * Create a new post draft for the authenticated user. The draft will be
-     * initialized with default values and a unique ID.
-     * 
-     * @param jwt The JWT token of the authenticated user.
-     * @return The response containing the ID of the newly created draft.
+     * Creates a new post draft.
+     *
+     * @param jwt authenticated user token
+     * @return draft creation response with ID
      */
     @PostMapping("/draft")
     public PostDraftCreateResponse createDraft(@AuthenticationPrincipal Jwt jwt) {
@@ -53,16 +52,12 @@ public class PostController {
     }
 
     /**
-     * Confirm the content of a post draft after the client has uploaded the content
-     * 
-     * @param id      the ID of the post draft to confirm
-     * @param request the request body containing the content confirmation details
-     *                (object key, etag, size, sha256)
-     * @param jwt     the JWT token of the authenticated user, used to extract the
-     *                user ID for authorization and processing
-     * @return a ResponseEntity with HTTP status 200 OK if the content confirmation
-     *         is successful, or an appropriate error status if it fails (e.g., 400
-     *         Bad Request for invalid input, 403 Forbidden for unauthorized access)
+     * Confirms draft content after upload.
+     *
+     * @param id post draft ID
+     * @param request content confirmation (object key, etag, size, sha256)
+     * @param jwt authenticated user token
+     * @return 200 OK on success
      */
     @PostMapping("/{id}/content/confirm")
     public ResponseEntity<Void> confirmContent(@PathVariable long id,
@@ -77,17 +72,12 @@ public class PostController {
     }
 
     /**
-     * Patch update the metadata of an existing post, such as title, tags,
-     * visibility, etc.
-     * Only the fields provided in the request will be updated, allowing for partial
-     * updates.
-     * 
-     * @param id      the ID of the post to update
-     * @param request the request body containing the metadata fields to update, all
-     *                fields are optional
-     * @param jwt     the JWT token of the authenticated user, used to extract the
-     *                user ID for authorization and processing
-     * @return a ResponseEntity with HTTP status 200 OK if the update is successful.
+     * Updates post metadata (title, tags, visibility, etc).
+     *
+     * @param id post ID
+     * @param request metadata fields to update (all optional)
+     * @param jwt authenticated user token
+     * @return 200 OK on success
      */
     @PatchMapping("/{id}")
     public ResponseEntity<Void> patchMetaData(@PathVariable long id,
@@ -102,15 +92,11 @@ public class PostController {
     }
 
     /**
-     * Publish a post draft, making it visible to the public or according to its
-     * visibility settings. Only the creator of the post can publish it.
-     * 
-     * @param id
-     * @param jwt
-     * @return a ResponseEntity with HTTP status 200 OK if the publish action is
-     *         successful, or an appropriate error status if it fails (e.g., 403
-     *         Forbidden for unauthorized access, 404 Not Found if the post does not
-     *         exist)
+     * Publishes a post draft.
+     *
+     * @param id post ID
+     * @param jwt authenticated user token
+     * @return 200 OK on success
      */
     @PatchMapping("/{id}/publish")
     public ResponseEntity<Void> publish(@PathVariable long id,
@@ -121,17 +107,12 @@ public class PostController {
     }
 
     /**
-     * Update the "top" status of a post, which determines whether the post is
-     * pinned to the top of the feed. Only the creator of the post can update this
-     * status.
-     * 
-     * @param id      the ID of the post to update
-     * @param request the request body containing the new "top" status (true for
-     *                pinned, false for unpinned)
-     * @param jwt     the JWT token of the authenticated user, used to extract the
-     *                user ID for authorization and processing
-     * @return a ResponseEntity with HTTP status 200 OK if the update is successful,
-     *         or an
+     * Updates post "top" status (pin/unpin).
+     *
+     * @param id post ID
+     * @param request request containing isTop flag
+     * @param jwt authenticated user token
+     * @return 200 OK on success
      */
     @PatchMapping("/{id}/top")
     public ResponseEntity<Void> patchTop(@PathVariable long id,
@@ -143,17 +124,12 @@ public class PostController {
     }
 
     /**
-     * Update the visibility of a post, which determines who can see the post. Only
-     * the creator of the post can update its visibility.
-     * 
-     * @param id      the ID of the post to update
-     * @param request the request body containing the new visibility setting (e.g.,
-     *                "public", "private", "friends")
-     * @param jwt     the JWT token of the authenticated user, used to extract the
-     *                user ID for authorization and processing
-     * @return a ResponseEntity with HTTP status 200 OK if the update is successful,
-     *         or an appropriate error status if it fails (e.g., 403 Forbidden for
-     *         unauthorized access, 404 Not Found if the post does not exist)
+     * Updates post visibility.
+     *
+     * @param id post ID
+     * @param request request containing visibility setting
+     * @param jwt authenticated user token
+     * @return 200 OK on success
      */
     @PatchMapping("/{id}/visibility")
     public ResponseEntity<Void> patchVisibility(@PathVariable long id,
@@ -165,17 +141,11 @@ public class PostController {
     }
 
     /**
-     * Delete a post, removing it from the feed and making it inaccessible to users.
-     * Only
-     * the creator of the post can delete it.
-     * 
-     * @param id  the ID of the post to delete
-     * @param jwt the JWT token of the authenticated user, used to extract the user
-     *            ID for authorization and processing
-     * @return a ResponseEntity with HTTP status 200 OK if the deletion is
-     *         successful, or an appropriate error status if it fails (e.g., 403
-     *         Forbidden for unauthorized access, 404 Not Found if the post does not
-     *         exist)
+     * Deletes a post.
+     *
+     * @param id post ID
+     * @param jwt authenticated user token
+     * @return 200 OK on success
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable long id,
@@ -186,12 +156,11 @@ public class PostController {
     }
 
     /**
-     * Get the detailed information of a post, including its content, metadata, and
-     * creator information. The visibility of the post will be determined based on
-     * the post's settings and the relationship between the current user and the creator.
-     * @param id
-     * @param jwt
-     * @return
+     * Gets post details.
+     *
+     * @param id post ID
+     * @param jwt authenticated user token (nullable)
+     * @return post detail response
      */
     @GetMapping("/{id}")
     public PostDetailResponse getDetail(@PathVariable long id,
@@ -201,18 +170,36 @@ public class PostController {
     }
 
     /**
-     * Get a paginated list of posts for the feed, which may include posts from followed users, recommended posts, or posts based on other criteria. The visibility of each post in the feed will be determined based on the post's settings and the relationship between the current user and the creator.
-     * @param page the page number to retrieve, starting from 1
-     * @param size the number of posts per page
-     * @param jwt the JWT token of the authenticated user, used to extract the user ID for authorization and processing
-     * @return a FeedPageResponse containing the paginated list of posts and related metadata
+     * Retrieves public feed/timeline.
+     *
+     * @param page page number (default 1)
+     * @param size page size (default 10)
+     * @param jwt authenticated user token (nullable)
+     * @return paginated feed response
      */
     @GetMapping("/feed")
     public FeedPageResponse feed(
-        @RequestParam(value = "page", defaultValue = "1") int page,
-        @RequestParam(value = "size", defaultValue = "10") int size,
-        @AuthenticationPrincipal Jwt jwt) {
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @AuthenticationPrincipal Jwt jwt) {
         Long currentUserIdNullable = jwt != null ? jwtService.extractUserId(jwt) : null;
         return postFeedService.getFeed(page, size, currentUserIdNullable);
+    }
+
+    /**
+     * Retrieves current user's personal posts.
+     *
+     * @param page page number (default 1)
+     * @param size page size (default 10)
+     * @param jwt authenticated user token
+     * @return paginated feed response
+     */
+    @GetMapping("/my")
+    public FeedPageResponse myFeed(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @AuthenticationPrincipal Jwt jwt) {
+        long userId = jwtService.extractUserId(jwt);
+        return postFeedService.getMyFeed(userId, page, size);
     }
 }
