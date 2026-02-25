@@ -66,7 +66,7 @@ public class FeedCacheInvalidationListener {
                         userCounterService.incrementLikesReceived(owner, delta);
                     }
                     if ("fav".equals(metric)) {
-                        userCounterService.incrementFavoritesReceived(owner, delta);
+                        userCounterService.incrementFavsReceived(owner, delta);
                     }
                 }
             } catch (Exception ignored) {

@@ -25,9 +25,7 @@ import com.star.share.posts.service.PostService;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 @RestController
 @RequestMapping("api/v1/posts")
@@ -202,6 +200,13 @@ public class PostController {
         return postService.getDetail(id, currentUserIdNullable);
     }
 
+    /**
+     * Get a paginated list of posts for the feed, which may include posts from followed users, recommended posts, or posts based on other criteria. The visibility of each post in the feed will be determined based on the post's settings and the relationship between the current user and the creator.
+     * @param page the page number to retrieve, starting from 1
+     * @param size the number of posts per page
+     * @param jwt the JWT token of the authenticated user, used to extract the user ID for authorization and processing
+     * @return a FeedPageResponse containing the paginated list of posts and related metadata
+     */
     @GetMapping("/feed")
     public FeedPageResponse feed(
         @RequestParam(value = "page", defaultValue = "1") int page,
