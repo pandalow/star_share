@@ -7,8 +7,6 @@ import com.star.share.auth.pojo.vo.AuthUserResponse;
 import com.star.share.auth.pojo.vo.SendCodeResponse;
 import com.star.share.auth.pojo.vo.TokenResponse;
 
-import java.util.Optional;
-
 public interface AuthService {
     /**
      * Send code and return expire time and identifier

@@ -14,7 +14,7 @@ public interface RelationMapper {
      * INSERT a FOLLOWING relationship into the database.
      * @param id the unique identifier for the relationship
      * @param fromUserId the user ID of the follower
-     * @param toUserId the user ID of the followee
+     * @param toUserId the user ID of the follow
      * @param relStatus the status of the relationship
      * @return the number of rows affected by the insert operation
      */
@@ -26,7 +26,7 @@ public interface RelationMapper {
     /**
      * DELETE a FOLLOWING relationship from the database.
      * @param fromUserId the user ID of the follower
-     * @param toUserId the user ID of the followee
+     * @param toUserId the user ID of the follow
      * @return the number of rows affected by the delete operation
      */
     int cancelFollowing(@Param("fromUserId") Long fromUserId,
@@ -35,7 +35,7 @@ public interface RelationMapper {
     /**
      * INSERT a FOLLOWER relationship into the database.
      * @param id the unique identifier for the relationship
-     * @param toUserId the user ID of the followee
+     * @param toUserId the user ID of the follow
      * @param fromUserId the user ID of the follower
      * @param relStatus the status of the relationship
      * @return the number of rows affected by the insert operation
@@ -47,17 +47,17 @@ public interface RelationMapper {
 
     /**
      * DELETE a FOLLOWER relationship from the database.
-     * @param toUserId the user ID of the followee
+     * @param toUserId the user ID of the follow
      * @param fromUserId the user ID of the follower
      * @return the number of rows affected by the delete operation
      */
     int cancelFollower(@Param("toUserId") Long toUserId,
-                       @Param("fromUserId") Long fromUserId);、
+                       @Param("fromUserId") Long fromUserId);
 
     /**
      * CHECK if a FOLLOWING relationship exists between two users.
      * @param fromUserId the user ID of the follower
-     * @param toUserId the user ID of the followee
+     * @param toUserId the user ID of the follow
      * @return 1 if the relationship exists, 0 otherwise
      */
     int existsFollowing(@Param("fromUserId") Long fromUserId,
@@ -76,7 +76,7 @@ public interface RelationMapper {
 
     /**
      * CHECK if a FOLLOWER relationship exists between two users.
-     * @param toUserId the user ID of the followee
+     * @param toUserId the user ID of the follow
      * @param limit the maximum number of results to return
      * @param offset the number of results to skip before starting to return results
      * @return a list of user IDs that are following the specified user, limited by the provided parameters
@@ -87,10 +87,10 @@ public interface RelationMapper {
 
     /**
      * CHECK if a FOLLOWING relationship exists between two users.
-     * @param toUserId the user ID of the followee
+     * @param toUserId the user ID of the follow
      * @param limit the maximum number of results to return
      * @param offset the number of results to skip before starting to return results
-     * @return a map where the key is the user ID of the followee and the value is another map containing details about the follower relationship, limited by the provided parameters
+     * @return a map where the key is the user ID of the follow and the value is another map containing details about the follower relationship, limited by the provided parameters
      */
     @MapKey("toUserId")
     Map<Long, Map<String, Object>> listFollowerRows(@Param("toUserId") Long toUserId,
@@ -106,7 +106,7 @@ public interface RelationMapper {
 
     /**
      * COUNT the number of active FOLLOWER relationships for a given user.
-     * @param toUserId the user ID of the followee
+     * @param toUserId the user ID of the follow
      * @return the number of active FOLLOWER relationships for the specified user
      */
     int countFollowerActive(@Param("toUserId") Long toUserId);
