@@ -71,28 +71,28 @@
         WHERE id = #{id} AND creator_id = #{creatorId}
     </update>
 
-    <!-- 设置置顶 -->
+    <!-- Set Top -->
     <update id="updateTop">
         UPDATE know_posts
         SET is_top = #{isTop}, update_time = NOW()
         WHERE id = #{id} AND creator_id = #{creatorId}
     </update>
 
-    <!-- 设置可见性 -->
+    <!-- Set Visibility -->
     <update id="updateVisibility">
         UPDATE know_posts
         SET visible = #{visible}, update_time = NOW()
         WHERE id = #{id} AND creator_id = #{creatorId}
     </update>
 
-    <!-- 软删除（保留记录，仅状态修改） -->
+    <!-- Soft Delete (retain record, only modify status) -->
     <update id="softDelete">
         UPDATE know_posts
         SET status = 'deleted', update_time = NOW()
         WHERE id = #{id} AND creator_id = #{creatorId}
     </update>
 
-    <!-- 首页 Feed 列表查询（公开可见 + 已发布），置顶优先，其次按发布时间倒序 -->
+    <!-- Homepage Feed List Query (publicly visible + published), top priority first, then by publish time descending -->
     <select id="listFeedPublic" resultType="com.star.share.posts.entity.vo.FeedItemResponse">
         SELECT
             p.id,
@@ -112,7 +112,7 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <!-- 我的知文列表查询（当前用户的已发布内容），置顶优先，其次按发布时间倒序 -->
+    <!-- My Published Posts List Query, top priority first, then by publish time descending -->
     <select id="listMyPublished" resultType="com.star.share.posts.entity.vo.FeedItemResponse">
         SELECT
             p.id,
@@ -132,7 +132,7 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <!-- 详情查询（含作者信息） -->
+    <!-- Detail -->
     <select id="findDetailById" parameterType="long" resultType="com.star.share.posts.entity.vo.KnowPostDetailRow">
         SELECT
             p.id,
@@ -157,7 +157,7 @@
         WHERE p.id = #{id}
     </select>
 
-    <select id="countMyPublished" parameterType="long" resultType="long">
+    <select id="countMyPublished" parameterType="long" resultType="com.star.share.posts.entity.vo.FeedItemResponse">
         SELECT COUNT(1)
         FROM know_posts
         WHERE creator_id = #{creatorId} AND status = 'published'

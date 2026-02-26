@@ -14,8 +14,10 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.context.event.EventListener;
 
+@Component
 public class FeedCacheInvalidationListener {
     private final Cache<String, FeedPageResponse> feedPublicCache;
     private final StringRedisTemplate redis;
@@ -49,7 +51,7 @@ public class FeedCacheInvalidationListener {
      */
     @EventListener
     public void onCounterChanged(CounterEvent event) {
-        if (!"knowpost".equals(event.getEntityType())) {
+        if (!"post".equals(event.getEntityType())) {
             return;
         }
 
