@@ -213,7 +213,7 @@ public class PostServiceImpl implements PostService {
     public void updateVisibility(long creatorId, long id, String visible) {
         feedCacheService.deleteAllCache();
         feedCacheService.deleteMyFeedCache(creatorId);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
         int updated = postMapper.updateVisibility(id, creatorId, visible);
 
         if (updated == 0) {
@@ -221,7 +221,7 @@ public class PostServiceImpl implements PostService {
         }
         feedCacheService.doubleDeleteCache(200);
         feedCacheService.doubleDeleteMyFeedCache(id, 200);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
     }
 
     /**
@@ -231,7 +231,7 @@ public class PostServiceImpl implements PostService {
     public void delete(long creatorId, long id) {
         feedCacheService.deleteAllCache();
         feedCacheService.deleteMyFeedCache(creatorId);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
         int updated = postMapper.softDelete(id, creatorId);
 
         if (updated == 0) {
@@ -239,13 +239,13 @@ public class PostServiceImpl implements PostService {
         }
         feedCacheService.doubleDeleteCache(200);
         feedCacheService.doubleDeleteMyFeedCache(id, 200);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
     }
 
     @Override
     @Transactional(readOnly = true)
     public PostDetailResponse getDetail(long id, Long currentUserIdNullable) {
-        String pageKey = "knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER;
+        String pageKey = "post:detail" + id + ":v" + DETAIL_LAYOUT_VER;
         String cached = redis.opsForValue().get(pageKey);
         if (cached != null) {
             if ("NULL".equals(cached)) {
