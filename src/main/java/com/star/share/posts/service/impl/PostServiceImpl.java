@@ -300,140 +300,152 @@ public class PostServiceImpl implements PostService {
                         base.visible(),
                         base.type(),
                         base.publishTime());
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         Object lock = singleFlight.computeIfAbsent(pageKey, k -> new Object());
-        synchronized (lock) {
-            String again = redis.opsForValue().get(pageKey);
-            if (again != null && !"NULL".equals(again)) {
-                try {
-                    PostDetailResponse base = objectMapper.readValue(again, PostDetailResponse.class);
-                    hotKey.record(pageKey);
-                    maybeExtendTtlDetail(pageKey);
 
-                    String cntKey = "feed:count:" + id;
-                    String cntJson = redis.opsForValue().get(cntKey);
-                    Long likeCount = base.likeCount();
-                    Long favoriteCount = base.favoriteCount();
-
-                    if (cntKey != null) {
-                        try {
-                            Map<String, Long> cm = objectMapper.readValue(cntJson,
-                                    new TypeReference<Map<String, Long>>() {
-                                    });
-                            likeCount = cm.getOrDefault("like", likeCount == null ? 0L : likeCount);
-                            favoriteCount = cm.getOrDefault("favorite", favoriteCount == null ? 0L : favoriteCount);
-                        } catch (Exception e) {
-                        }
-                    }
-
-                    boolean liked = currentUserIdNullable != null
-                            && counterService.isLiked("post", String.valueOf(id), currentUserIdNullable);
-                    boolean favorited = currentUserIdNullable != null
-                            && counterService.isFaved("post", String.valueOf(id), currentUserIdNullable);
-
-                    singleFlight.remove(pageKey);
-
-                    return new PostDetailResponse(
-                            String.valueOf(id),
-                            base.title(),
-                            base.description(),
-                            base.contentUrl(),
-                            base.images(),
-                            base.tags(),
-                            base.authorId(),
-                            base.authorAvatar(),
-                            base.authorNickname(),
-                            base.authorTagJson(),
-                            likeCount,
-                            favoriteCount,
-                            liked,
-                            favorited,
-                            base.isTop(),
-                            base.visible(),
-                            base.type(),
-                            base.publishTime());
-                } catch (Exception e) {}
-            }
-        
-
-        PostDetailRow row = postMapper.findDetailById(id);
-        if (row == null || "deleted".equals(row.getStatus())) {
-            redis.opsForValue().set(pageKey, "NULL", Duration.ofSeconds(30 + ThreadLocalRandom.current().nextInt(31)));
-            singleFlight.remove(pageKey);
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "The post is not existed");
-        }
-        boolean isPublic = "published".equals(row.getStatus()) && "public".equals(row.getVisible());
-        boolean isOwner = currentUserIdNullable != null && row.getCreatorId() != null
-                && currentUserIdNullable.equals(row.getCreatorId());
-
-        if (!isPublic && !isOwner) {
-            singleFlight.remove(pageKey);
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "The post is not authorized to access");
-        }
-
-        List<String> images = parseStringArray(row.getImgUrls());
-        List<String> tags = parseStringArray(row.getTags());
-        Map<String, Long> counts = counterService.getCounts("knowpost", String.valueOf(row.getId()),
-                List.of("like", "fav"));
-        Long favoriteCount = counts.getOrDefault("fav", 0L);
-        Long likeCount = counts.getOrDefault("like", 0L);
-
-        PostDetailResponse detail = new PostDetailResponse(
-                String.valueOf(row.getId()),
-                row.getTitle(),
-                row.getDescription(),
-                row.getContentUrl(),
-                images,
-                tags,
-                String.valueOf(row.getCreatorId()),
-                row.getAuthorAvatar(),
-                row.getAuthorNickname(),
-                row.getAuthorTagJson(),
-                likeCount,
-                favoriteCount,
-                null,
-                null,
-                row.getIsTop(),
-                row.getVisible(),
-                row.getType(),
-                row.getPublishTime());
-
+        // Using try-finally to ensure that the singleFlight entry is removed after
+        // processing, preventing memory leaks
         try {
-            String json = objectMapper.writeValueAsString(detail);
-            int baseTtl = 60;
-            int jitter = ThreadLocalRandom.current().nextInt(30);
-            int target = hotKey.ttlForPublic(baseTtl, pageKey);
-            redis.opsForValue().set(pageKey, json, Duration.ofSeconds(Math.max(target, baseTtl + jitter)));
+            synchronized (lock) {
+                String again = redis.opsForValue().get(pageKey);
+                if (again != null && !"NULL".equals(again)) {
+                    try {
+                        PostDetailResponse base = objectMapper.readValue(again, PostDetailResponse.class);
+                        hotKey.record(pageKey);
+                        maybeExtendTtlDetail(pageKey);
 
-        } catch (Exception e) {}
+                        String cntKey = "feed:count:" + id;
+                        String cntJson = redis.opsForValue().get(cntKey);
+                        Long likeCount = base.likeCount();
+                        Long favoriteCount = base.favoriteCount();
 
-        boolean liked = currentUserIdNullable != null
-                && counterService.isLiked("post", String.valueOf(id), currentUserIdNullable);
-        boolean favorited = currentUserIdNullable != null
-                && counterService.isFaved("post", String.valueOf(id), currentUserIdNullable);
-        singleFlight.remove(pageKey);
+                        if (cntKey != null) {
+                            try {
+                                Map<String, Long> cm = objectMapper.readValue(cntJson,
+                                        new TypeReference<Map<String, Long>>() {
+                                        });
+                                likeCount = cm.getOrDefault("like", likeCount == null ? 0L : likeCount);
+                                favoriteCount = cm.getOrDefault("favorite", favoriteCount == null ? 0L : favoriteCount);
+                            } catch (Exception e) {
+                            }
+                        }
 
-        return new PostDetailResponse(
-                String.valueOf(row.getId()),
-                detail.title(),
-                detail.description(),
-                detail.contentUrl(),
-                detail.images(),
-                detail.tags(),
-                detail.authorId(),
-                detail.authorAvatar(),
-                detail.authorNickname(),
-                detail.authorTagJson(),
-                detail.likeCount(),
-                detail.favoriteCount(),
-                liked,
-                favorited,
-                detail.isTop(),
-                detail.visible(),
-                detail.type(),
-                detail.publishTime());}
+                        boolean liked = currentUserIdNullable != null
+                                && counterService.isLiked("post", String.valueOf(id), currentUserIdNullable);
+                        boolean favorited = currentUserIdNullable != null
+                                && counterService.isFaved("post", String.valueOf(id), currentUserIdNullable);
+
+                        return new PostDetailResponse(
+                                String.valueOf(id),
+                                base.title(),
+                                base.description(),
+                                base.contentUrl(),
+                                base.images(),
+                                base.tags(),
+                                base.authorId(),
+                                base.authorAvatar(),
+                                base.authorNickname(),
+                                base.authorTagJson(),
+                                likeCount,
+                                favoriteCount,
+                                liked,
+                                favorited,
+                                base.isTop(),
+                                base.visible(),
+                                base.type(),
+                                base.publishTime());
+                    } catch (Exception e) {
+                    } finally {
+                        singleFlight.remove(pageKey);
+                    }
+                }
+
+                PostDetailRow row = postMapper.findDetailById(id);
+                if (row == null || "deleted".equals(row.getStatus())) {
+                    redis.opsForValue().set(pageKey, "NULL",
+                            Duration.ofSeconds(30 + ThreadLocalRandom.current().nextInt(31)));
+                    singleFlight.remove(pageKey);
+                    throw new BusinessException(ErrorCode.BAD_REQUEST, "The post is not existed");
+                }
+                boolean isPublic = "published".equals(row.getStatus()) && "public".equals(row.getVisible());
+                boolean isOwner = currentUserIdNullable != null && row.getCreatorId() != null
+                        && currentUserIdNullable.equals(row.getCreatorId());
+
+                if (!isPublic && !isOwner) {
+                    singleFlight.remove(pageKey);
+                    throw new BusinessException(ErrorCode.BAD_REQUEST, "The post is not authorized to access");
+                }
+
+                List<String> images = parseStringArray(row.getImgUrls());
+                List<String> tags = parseStringArray(row.getTags());
+                Map<String, Long> counts = counterService.getCounts("knowpost", String.valueOf(row.getId()),
+                        List.of("like", "fav"));
+                Long favoriteCount = counts.getOrDefault("fav", 0L);
+                Long likeCount = counts.getOrDefault("like", 0L);
+
+                PostDetailResponse detail = new PostDetailResponse(
+                        String.valueOf(row.getId()),
+                        row.getTitle(),
+                        row.getDescription(),
+                        row.getContentUrl(),
+                        images,
+                        tags,
+                        String.valueOf(row.getCreatorId()),
+                        row.getAuthorAvatar(),
+                        row.getAuthorNickname(),
+                        row.getAuthorTagJson(),
+                        likeCount,
+                        favoriteCount,
+                        null,
+                        null,
+                        row.getIsTop(),
+                        row.getVisible(),
+                        row.getType(),
+                        row.getPublishTime());
+
+                try {
+                    String json = objectMapper.writeValueAsString(detail);
+                    int baseTtl = 60;
+                    int jitter = ThreadLocalRandom.current().nextInt(30);
+                    int target = hotKey.ttlForPublic(baseTtl, pageKey);
+                    redis.opsForValue().set(pageKey, json, Duration.ofSeconds(Math.max(target, baseTtl + jitter)));
+
+                } catch (Exception e) {
+                }
+
+                boolean liked = currentUserIdNullable != null
+                        && counterService.isLiked("post", String.valueOf(id), currentUserIdNullable);
+                boolean favorited = currentUserIdNullable != null
+                        && counterService.isFaved("post", String.valueOf(id), currentUserIdNullable);
+                singleFlight.remove(pageKey);
+
+                return new PostDetailResponse(
+                        String.valueOf(row.getId()),
+                        detail.title(),
+                        detail.description(),
+                        detail.contentUrl(),
+                        detail.images(),
+                        detail.tags(),
+                        detail.authorId(),
+                        detail.authorAvatar(),
+                        detail.authorNickname(),
+                        detail.authorTagJson(),
+                        detail.likeCount(),
+                        detail.favoriteCount(),
+                        liked,
+                        favorited,
+                        detail.isTop(),
+                        detail.visible(),
+                        detail.type(),
+                        detail.publishTime());
+            }
+
+        } finally {
+            singleFlight.remove(pageKey);
+        }
 
     }
 
