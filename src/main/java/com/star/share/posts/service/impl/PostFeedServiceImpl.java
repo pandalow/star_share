@@ -110,52 +110,54 @@ public class PostFeedServiceImpl implements PostFeedService {
         }
 
         Object lock = singleFlight.computeIfAbsent(idsKey, k -> new Object());
-        synchronized (lock) {
-            // Double check after acquiring lock
-            FeedPageResponse again = assembleFromCache(idsKey, hasMoreKey, safePage, safeSize, currentUserIdNullable);
-            if (again != null) {
-                feedPublicCache.put(localPageKey, again);
 
-                if (again.items() != null) {
-                    for (FeedItemResponse item : again.items()) {
-                        recordItemHotKey(item.id());
+        try {
+            synchronized (lock) {
+                // Double check after acquiring lock
+                FeedPageResponse again = assembleFromCache(idsKey, hasMoreKey, safePage, safeSize,
+                        currentUserIdNullable);
+                if (again != null) {
+                    feedPublicCache.put(localPageKey, again);
+
+                    if (again.items() != null) {
+                        for (FeedItemResponse item : again.items()) {
+                            recordItemHotKey(item.id());
+                        }
                     }
+                    log.info(
+                            "feed.public source=3tier(after-flight) localPageKey={} idsKey={} hasMoreKey={} page={} size={}",
+                            localPageKey, idsKey, hasMoreKey, safePage, safeSize);
+                    return again;
                 }
-                log.info(
-                        "feed.public source=3tier(after-flight) localPageKey={} idsKey={} hasMoreKey={} page={} size={}",
-                        localPageKey, idsKey, hasMoreKey, safePage, safeSize);
 
-                singleFlight.remove(idsKey);
-                return again;
-            }
+                // Database retrieval,
+                int offset = (safePage - 1) * safeSize;
+                List<PostFeedRow> rows = postMapper.listFeedPublic(safeSize + 1, offset);
+                boolean hasMore = rows.size() > safeSize;
+                if (hasMore) {
+                    rows = rows.subList(0, safeSize);
+                }
 
-            // Database retrieval,
-            int offset = (safePage - 1) * safeSize;
-            List<PostFeedRow> rows = postMapper.listFeedPublic(safeSize + 1, offset);
-            boolean hasMore = rows.size() > safeSize;
-            if (hasMore) {
-                rows = rows.subList(0, safeSize);
-            }
+                // Building cache and response
+                List<FeedItemResponse> items = mapRowsToItems(rows, null, false);
 
-            // Building cache and response
-            List<FeedItemResponse> items = mapRowsToItems(rows, null, false);
+                FeedPageResponse responseForCache = new FeedPageResponse(items, safePage, safeSize, hasMore);
 
-            FeedPageResponse responseForCache = new FeedPageResponse(items, safePage, safeSize, hasMore);
+                // Segments of cache keys;
+                int baseTtl = 60;
+                int jitter = ThreadLocalRandom.current().nextInt(30);
+                Duration frTtl = Duration.ofSeconds(baseTtl + jitter);
 
-            // Segments of cache keys;
-            int baseTtl = 60;
-            int jitter = ThreadLocalRandom.current().nextInt(30);
-            Duration frTtl = Duration.ofSeconds(baseTtl + jitter);
+                writeToCache(localPageKey, idsKey, hasMoreKey, safeSize, rows, items, hasMore, frTtl);
+                feedPublicCache.put(localPageKey, responseForCache);
 
-            writeToCache(localPageKey, idsKey, hasMoreKey, safeSize, rows, items, hasMore, frTtl);
-            feedPublicCache.put(localPageKey, responseForCache);
-
-            List<FeedItemResponse> enriched = enrich(items, currentUserIdNullable);
-
+                List<FeedItemResponse> enriched = enrich(items, currentUserIdNullable);
+                return new FeedPageResponse(enriched, safePage, safeSize, hasMore);
+            }       
+        } finally {
             singleFlight.remove(idsKey);
-
-            return new FeedPageResponse(enriched, safePage, safeSize, hasMore);
         }
+
     }
 
     /**

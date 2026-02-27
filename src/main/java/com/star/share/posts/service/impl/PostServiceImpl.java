@@ -93,7 +93,7 @@ public class PostServiceImpl implements PostService {
     public void confirmContent(long creatorId, long id, String objectKey, String etag, Long size, String sha256) {
         feedCacheService.deleteAllCache();
         feedCacheService.deleteMyFeedCache(creatorId);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
 
         Post post = Post.builder()
                 .id(id)
@@ -113,7 +113,7 @@ public class PostServiceImpl implements PostService {
 
         feedCacheService.doubleDeleteCache(200);
         feedCacheService.doubleDeleteMyFeedCache(id, 200);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
 
         // TODO: adding ragindex update logic here
     }
@@ -131,7 +131,7 @@ public class PostServiceImpl implements PostService {
             List<String> imgUrls, String visible, Boolean isTop, String description) {
         feedCacheService.deleteAllCache();
         feedCacheService.deleteMyFeedCache(creatorId);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
         Post post = Post.builder()
                 .id(id)
                 .creatorId(creatorId)
@@ -151,7 +151,7 @@ public class PostServiceImpl implements PostService {
         }
         feedCacheService.doubleDeleteCache(200);
         feedCacheService.doubleDeleteMyFeedCache(id, 200);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
 
         // TODO: adding ragindex update logic here
 
@@ -162,7 +162,7 @@ public class PostServiceImpl implements PostService {
     public void publish(long creatorId, long id) {
         feedCacheService.deleteAllCache();
         feedCacheService.deleteMyFeedCache(creatorId);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
         int updated = postMapper.publish(id, creatorId);
 
         if (updated == 0) {
@@ -178,7 +178,7 @@ public class PostServiceImpl implements PostService {
         }
         feedCacheService.doubleDeleteCache(200);
         feedCacheService.doubleDeleteMyFeedCache(id, 200);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
 
         // TODO: adding ragindex update logic here
     }
@@ -192,7 +192,7 @@ public class PostServiceImpl implements PostService {
     public void updateTop(long creatorId, long id, boolean isTop) {
         feedCacheService.deleteAllCache();
         feedCacheService.deleteMyFeedCache(creatorId);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
         int updated = postMapper.updateTop(id, creatorId, isTop);
 
         if (updated == 0) {
@@ -200,7 +200,7 @@ public class PostServiceImpl implements PostService {
         }
         feedCacheService.doubleDeleteCache(200);
         feedCacheService.doubleDeleteMyFeedCache(id, 200);
-        redis.delete("knowpost:detail" + id + ":v" + DETAIL_LAYOUT_VER);
+        redis.delete("post:detail" + id + ":v" + DETAIL_LAYOUT_VER);
     }
 
     /**

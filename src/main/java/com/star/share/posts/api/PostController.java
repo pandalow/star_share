@@ -47,8 +47,8 @@ public class PostController {
     public PostDraftCreateResponse createDraft(@AuthenticationPrincipal Jwt jwt) {
 
         long userId = jwtService.extractUserId(jwt);
-        postService.createDraft(userId);
-        return new PostDraftCreateResponse(String.valueOf(userId));
+        long draftId = postService.createDraft(userId);
+        return new PostDraftCreateResponse(String.valueOf(draftId));
     }
 
     /**
