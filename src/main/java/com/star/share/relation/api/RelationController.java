@@ -112,7 +112,7 @@ public class RelationController {
 
     /**
      * Endpoint to retrieve various counters related to a user, such as the number of
-     * followings, followers, posts, liked posts, and favorited posts. The method
+     * followings, followers, posts, liked posts, and favorite posts. The method
      * first attempts to retrieve the counters from Redis cache. If the cache is
      * missing or inconsistent with the database, it triggers a consistency check and
      * potentially rebuilds the cache asynchronously.

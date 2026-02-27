@@ -52,7 +52,7 @@ public interface RelationMapper {
      * @return the number of rows affected by the delete operation
      */
     int cancelFollower(@Param("toUserId") Long toUserId,
-                       @Param("fromUserId") Long fromUserId);、
+                       @Param("fromUserId") Long fromUserId);
 
     /**
      * CHECK if a FOLLOWING relationship exists between two users.
@@ -90,7 +90,7 @@ public interface RelationMapper {
      * @param toUserId the user ID of the followee
      * @param limit the maximum number of results to return
      * @param offset the number of results to skip before starting to return results
-     * @return a map where the key is the user ID of the followee and the value is another map containing details about the follower relationship, limited by the provided parameters
+     * @return a map where the key is the user ID of the follow and the value is another map containing details about the follower relationship, limited by the provided parameters
      */
     @MapKey("toUserId")
     Map<Long, Map<String, Object>> listFollowerRows(@Param("toUserId") Long toUserId,
