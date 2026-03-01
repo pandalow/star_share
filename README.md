@@ -7,6 +7,7 @@ A knowledge sharing service built with Java 21 and Spring Boot 3.2.
 Star Share is a modern backend service designed for high-concurrency content sharing platforms. It features a robust architecture integrating traditional relational databases with high-performance caching and messaging queues. The system is designed to handle large-scale user interactions such as likes, views, and comments efficiently.
 
 ## Related Docs
+API: [API GUIDE](/docs/api/API.md)
 
 
 ## Technical Architecture
