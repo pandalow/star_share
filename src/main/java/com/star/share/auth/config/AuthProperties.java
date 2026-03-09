@@ -1,6 +1,7 @@
 package com.star.share.auth.config;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 
@@ -13,7 +14,7 @@ import java.time.Duration;
  * - Password:
  */
 @Data
-@Configuration
+@ConfigurationProperties(prefix = "auth")
 public class AuthProperties {
 
     private final Jwt jwt = new Jwt();

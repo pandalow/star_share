@@ -8,7 +8,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.star.share.cache.config.CacheProperties;
+import org.springframework.stereotype.Component;
 
+@Component
 public class HotKeyDetector {
     public enum Level {
         NONE, LOW, MEDIUM, HIGH

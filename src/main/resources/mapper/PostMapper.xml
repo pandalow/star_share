@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.star.share.posts.mapper.PostMapper">
+<mapper namespace="com.star.share.posts.dao.PostMapper">
 
     <resultMap id="PostResultMap" type="com.star.share.posts.entity.model.Post">
         <id property="id" column="id" />
@@ -133,7 +133,7 @@
     </select>
 
     <!-- Detail -->
-    <select id="findDetailById" parameterType="long" resultType="com.star.share.posts.entity.vo.KnowPostDetailRow">
+    <select id="findDetailById" parameterType="long" resultType="com.star.share.posts.entity.model.PostDetailRow">
         SELECT
             p.id,
             p.creator_id AS creatorId,

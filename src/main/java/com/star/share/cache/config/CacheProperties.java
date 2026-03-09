@@ -1,7 +1,10 @@
 package com.star.share.cache.config;
 
 import lombok.Data;
+import org.springframework.stereotype.Component;
+
 @Data
+@Component
 public class CacheProperties {
     private L2 l2 = new L2();
     private HotKey hotKey = new HotKey();
